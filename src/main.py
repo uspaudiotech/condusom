@@ -1,8 +1,6 @@
 from Webcam import Webcam
 from HandDetector import HandDetectorMP, HandDetectorCV
 from Theremin import Theremin
-# import threading
-# import queue
 
 def main():
 	webcam = Webcam()

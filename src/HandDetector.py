@@ -2,6 +2,65 @@ import cv2
 from cvzone.HandTrackingModule import HandDetector
 import mediapipe as mp
 
+class HandDetectorCV:
+	def __init__(self):
+		self.detector = HandDetector(staticMode=False,
+															 maxHands=2,
+															 modelComplexity=1,
+															 detectionCon=0.8
+															 )
+
+	def run(self, webcam, theremin):
+		while True:
+			success, img = webcam.cap.read()
+			hands, img = self.detector.findHands(img, draw=True, flipType=True)
+			hand_positions = []
+
+			if hands:
+				# First hand
+				hand1 = hands[0]
+				lmList1 = hand1['lmList']
+				center1 = hand1['center']
+				handType1 = hand1['type']
+
+				hand_positions.append((0,center1[1]))
+
+				# Calculate distance between specific landmarks on the first hand and draw it on the image
+				length, info, img = self.detector.findDistance(lmList1[8][0:2],
+																									 lmList1[12][0:2],
+																									 img,
+																									 color=(255,0,255),
+																									 scale=10
+																									 )
+				# Second hand
+				if len(hands) == 2:
+					# Information for the second hand
+					hand2 = hands[1]
+					lmList2 = hand2['lmList']
+					bbox2 = hand2['bbox']
+					center2 = hand2['center']
+					handType2 = hand2['type']
+
+					hand_positions.append((0,center1[1]))
+
+					# Calculate distance between the index fingers of both hands and draw it on the image
+					length, info, img = self.detector.findDistance(lmList2[8][0:2],
+																										lmList2[8][0:2],
+																										img,
+																										color=(255,0,0),
+																										scale=10
+																										)
+			
+			theremin.update(hand_positions)
+			cv2.imshow("img", img)
+
+			# Press 'd' to exit the application
+			if cv2.waitKey(webcam.refresh_rate) & 0xFF == ord("d"):
+				break
+
+		theremin.close()
+		webcam.cap.release()
+
 class HandDetectorMP:
 	def __init__(
 		self,
@@ -99,62 +158,3 @@ class HandDetectorMP:
 			# Press 'd' to exit the application
 			if cv2.waitKey(webcam.refresh_rate) & 0xFF == ord("d"):
 				break	
-
-class HandDetectorCV:
-	def __init__(self):
-		self.detector = HandDetector(staticMode=False,
-															 maxHands=2,
-															 modelComplexity=1,
-															 detectionCon=0.8
-															 )
-
-	def run(self, webcam, theremin):
-		while True:
-			success, img = webcam.cap.read()
-			hands, img = self.detector.findHands(img, draw=True, flipType=True)
-			hand_positions = []
-
-			if hands:
-				# First hand
-				hand1 = hands[0]
-				lmList1 = hand1['lmList']
-				center1 = hand1['center']
-				handType1 = hand1['type']
-
-				hand_positions.append((0,center1[1]))
-
-				# Calculate distance between specific landmarks on the first hand and draw it on the image
-				length, info, img = self.detector.findDistance(lmList1[8][0:2],
-																									 lmList1[12][0:2],
-																									 img,
-																									 color=(255,0,255),
-																									 scale=10
-																									 )
-				# Second hand
-				if len(hands) == 2:
-					# Information for the second hand
-					hand2 = hands[1]
-					lmList2 = hand2['lmList']
-					bbox2 = hand2['bbox']
-					center2 = hand2['center']
-					handType2 = hand2['type']
-
-					hand_positions.append((0,center1[1]))
-
-					# Calculate distance between the index fingers of both hands and draw it on the image
-					length, info, img = self.detector.findDistance(lmList2[8][0:2],
-																										lmList2[8][0:2],
-																										img,
-																										color=(255,0,0),
-																										scale=10
-																										)
-			
-			theremin.update(hand_positions)
-			cv2.imshow("img", img)
-
-			# Press 'd' to exit the application
-			if cv2.waitKey(webcam.refresh_rate) & 0xFF == ord("d"):
-				break
-
-		theremin.close()
-		webcam.cap.release()
