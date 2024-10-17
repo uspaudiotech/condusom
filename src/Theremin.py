@@ -1,4 +1,4 @@
-from constants import SR, DEF_AMP, HEIGHT, MIN_FREQ, MAX_FREQ
+from constants import SR, DEF_AMP, HEIGHT, MIN_FREQ, MAX_FREQ, NUM_LANDMARKS
 import pyaudio
 import numpy as np
 
@@ -25,21 +25,13 @@ class Theremin:
 
   def update(self, hand_positions):
     print(f"{hand_positions}")
-    # if len(hand_positions) == 1:
-    # y1 = hand_positions[0][1]  # Y-coordinate of the first hand
-    
-    # Chooses randomly one of the 21 landmarks to control the frequency
-    y1 = hand_positions[np.random.randint(0, 21)]
+    # Chooses randomly one of the 21 landmarks to set the frequency
+    y1 = hand_positions[np.random.randint(0,NUM_LANDMARKS)]
 
-    self.freq = np.interp(y1, [0,HEIGHT], [MAX_FREQ,MIN_FREQ])  # Map y1 to frequency range
+    # Map y1 to frequency range
+    self.freq = np.interp(y1, [int(-HEIGHT/2),int(3*HEIGHT/2)], [MAX_FREQ,MIN_FREQ])  # linear
     self.amplitude = DEF_AMP
     # print(f"Updated frequency: {self.freq}")
-
-    # elif len(hand_positions) == 2:
-    #   y1 = hand_positions[0][1]  # Y-coordinate of the first hand
-    #   y2 = hand_positions[1][1]  # Y-coordinate of the second hand
-    #   freq = np.interp(y1, [0, 480], [100, 1000])  # Map y1 to frequency range
-    #   amplitude = np.interp(y2, [0, 480], [0, 1])  # Map y2 to amplitude range
 
   def close(self):
     self.stream.stop_stream()

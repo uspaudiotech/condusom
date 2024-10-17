@@ -1,4 +1,4 @@
-from constants import MAX_HANDS, FPS
+from constants import MAX_HANDS, FPS, HEIGHT, NUM_LANDMARKS
 from Theremin import Theremin
 import cv2
 from cvzone.HandTrackingModule import HandDetector
@@ -13,7 +13,7 @@ class HandDetectorCV:
 															 modelComplexity=1,
 															 detectionCon=0.8
 															 )
-		self.hand_positions = [0] * 21
+		self.hand_positions = [-HEIGHT] * NUM_LANDMARKS
 		self.theremin = Theremin()
 		self.running = True # Flag to stop the threads
 
@@ -24,28 +24,14 @@ class HandDetectorCV:
 				img = cv2.flip(img,1) # mirror the image
 				if not success:
 					break
-				hands, img = self.detector.findHands(img, draw=True, flipType=True)
+				hands, img = self.detector.findHands(img, draw=True, flipType=False)
 
 				if hands:
-					# First hand
-					hand1 = hands[0]
-					# center1 = hand1['center']
-					lmList1 = hand1['lmList']
-					# handType1 = hand1['type']
-
-					# self.hand_positions.remove(self.hand_positions[0])
-					# self.hand_positions.append((0,center1[1]))
-					self.hand_positions = [lm[1] for lm in lmList1]
-
-					# Second hand
-					# if len(hands) == 2:
-					# 	# Information for the second hand
-					# 	hand2 = hands[1]
-					# 	center2 = hand2['center']
-					# 	# lmList2 = hand2['lmList']
-					# 	# handType2 = hand2['type']
-
-					# 	self.hand_positions.append((0,center2[1]))
+					for hand in hands:
+						lmList = hand['lmList']
+						self.hand_positions = [lm[1] for lm in lmList]
+				else:
+					self.hand_positions = [-HEIGHT] * NUM_LANDMARKS 
 
 				cv2.imshow("img", img)
 
