@@ -8,9 +8,7 @@ def main():
 	# hand_detector = HandDetectorMP()
 	hand_detector = HandDetectorCV()
 
-	theremin = Theremin()
-
-	hand_detector.run(webcam, theremin)
+	hand_detector.run(webcam,)
 
 if __name__ == "__main__":
 	main()
