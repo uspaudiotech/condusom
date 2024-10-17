@@ -26,8 +26,11 @@ class Theremin:
   def update(self, hand_positions):
     print(f"{hand_positions}")
     # if len(hand_positions) == 1:
-    y1 = hand_positions[0][1]  # Y-coordinate of the first hand
-    # y1 = np.mean([pos[1] for pos in hand_positions[:5]])  # Mean of the Y-coordinates of the first 5 hands
+    # y1 = hand_positions[0][1]  # Y-coordinate of the first hand
+    
+    # Chooses randomly one of the 21 landmarks to control the frequency
+    y1 = hand_positions[np.random.randint(0, 21)]
+
     self.freq = np.interp(y1, [0,HEIGHT], [MAX_FREQ,MIN_FREQ])  # Map y1 to frequency range
     self.amplitude = DEF_AMP
     # print(f"Updated frequency: {self.freq}")

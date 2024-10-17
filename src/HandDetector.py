@@ -13,9 +13,9 @@ class HandDetectorCV:
 															 modelComplexity=1,
 															 detectionCon=0.8
 															 )
-		self.hand_positions = [(0,0)] * 5
+		self.hand_positions = [0] * 21
 		self.theremin = Theremin()
-		self.running = True
+		self.running = True # Flag to stop the threads
 
 	def run(self, webcam):
 		def webcam_t():
@@ -29,12 +29,13 @@ class HandDetectorCV:
 				if hands:
 					# First hand
 					hand1 = hands[0]
-					center1 = hand1['center']
-					# lmList1 = hand1['lmList']
+					# center1 = hand1['center']
+					lmList1 = hand1['lmList']
 					# handType1 = hand1['type']
 
-					self.hand_positions.remove(self.hand_positions[0])
-					self.hand_positions.append((0,center1[1]))
+					# self.hand_positions.remove(self.hand_positions[0])
+					# self.hand_positions.append((0,center1[1]))
+					self.hand_positions = [lm[1] for lm in lmList1]
 
 					# Second hand
 					# if len(hands) == 2:
