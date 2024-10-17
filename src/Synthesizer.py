@@ -3,7 +3,7 @@ import pyaudio
 import numpy as np
 
 
-class Theremin:
+class Synthesizer:
   def __init__(self):
     self.pa = pyaudio.PyAudio()
     self.freq = 0
@@ -29,7 +29,7 @@ class Theremin:
     y1 = hand_positions[np.random.randint(0,NUM_LANDMARKS)]
 
     # Map y1 to frequency range
-    self.freq = np.interp(y1, [int(-HEIGHT/2),int(3*HEIGHT/2)], [MAX_FREQ,MIN_FREQ])  # linear
+    self.freq = np.interp(y1, [int(-HEIGHT/2),HEIGHT-100], [MAX_FREQ,MIN_FREQ])  # linear
     self.amplitude = DEF_AMP
     # print(f"Updated frequency: {self.freq}")
 

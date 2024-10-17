@@ -1,5 +1,5 @@
 from constants import MAX_HANDS, FPS, HEIGHT, NUM_LANDMARKS
-from Theremin import Theremin
+from Synthesizer import Synthesizer
 import cv2
 from cvzone.HandTrackingModule import HandDetector
 import mediapipe as mp
@@ -14,7 +14,7 @@ class HandDetectorCV:
 															 detectionCon=0.8
 															 )
 		self.hand_positions = [-HEIGHT] * NUM_LANDMARKS
-		self.theremin = Theremin()
+		self.synthesizer = Synthesizer()
 		self.running = True # Flag to stop the threads
 
 	def run(self, webcam):
@@ -43,7 +43,7 @@ class HandDetectorCV:
 
 		def audio_t():
 			while self.running:
-				self.theremin.update(self.hand_positions)
+				self.synthesizer.update(self.hand_positions)
 				time.sleep(1/FPS)
 
 		webcam_t = threading.Thread(target=webcam_t)
@@ -55,7 +55,7 @@ class HandDetectorCV:
 		webcam_t.join()
 		audio_t.join()
 
-		self.theremin.close()
+		self.synthesizer.close()
 		webcam.cap.release()
 
 class HandDetectorMP:

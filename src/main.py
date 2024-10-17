@@ -1,6 +1,6 @@
 from Webcam import Webcam
 from HandDetector import HandDetectorMP, HandDetectorCV
-from Theremin import Theremin
+from Synthesizer import Synthesizer
 
 def main():
 	webcam = Webcam()
