@@ -1,4 +1,4 @@
-from constants import SR, DEF_AMP
+from constants import SR, DEF_AMP, HEIGHT, MIN_FREQ, MAX_FREQ
 import pyaudio
 import numpy as np
 
@@ -24,12 +24,13 @@ class Theremin:
     return (samples.tobytes(), pyaudio.paContinue)
 
   def update(self, hand_positions):
-    print(f"Hand positions: {hand_positions}")  # Debugging: Print hand positions
-    if len(hand_positions) == 1:
-      y1 = hand_positions[-1][1]  # Y-coordinate of the first hand
-      self.freq = np.interp(y1, [0,480], [440,60])  # Map y1 to frequency range
-      self.amplitude = DEF_AMP
-      # print(f"Updated frequency: {self.freq}")
+    print(f"{hand_positions}")
+    # if len(hand_positions) == 1:
+    y1 = hand_positions[0][1]  # Y-coordinate of the first hand
+    # y1 = np.mean([pos[1] for pos in hand_positions[:5]])  # Mean of the Y-coordinates of the first 5 hands
+    self.freq = np.interp(y1, [0,HEIGHT], [MAX_FREQ,MIN_FREQ])  # Map y1 to frequency range
+    self.amplitude = DEF_AMP
+    # print(f"Updated frequency: {self.freq}")
 
     # elif len(hand_positions) == 2:
     #   y1 = hand_positions[0][1]  # Y-coordinate of the first hand

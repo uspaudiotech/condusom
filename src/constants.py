@@ -1,13 +1,17 @@
-# Audio settings
-SR = 22050
-CHUNK = 64
+# Webcam constants
+WIDTH = 1280 
+HEIGHT = 720 
 
 # Frequency range for the theremin
-MIN_FREQ = 60
-MAX_FREQ = 440
+MIN_FREQ = -100 
+MAX_FREQ = 2000 
+
+# Audio settings
+SR = MAX_FREQ * 2
+CHUNK = 64
 
 # Amplitude settings
-DEF_AMP = 0.5
+DEF_AMP = 0.1
 
 # Hand detection settings
 HAND_DETECTION_CONFIDENCE = 0.8

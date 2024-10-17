@@ -1,4 +1,4 @@
-from constants import FPS
+from constants import FPS, WIDTH, HEIGHT
 import cv2
 
 def fps2ms(fps):
@@ -10,7 +10,6 @@ class Webcam:
     self.refresh_rate = fps2ms(FPS)
 
     # Reduce frame size for better performance
-    width = 1280; height = 640
-    self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
-    self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, height)
+    self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, WIDTH)
+    self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, HEIGHT)
 

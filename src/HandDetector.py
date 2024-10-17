@@ -13,7 +13,7 @@ class HandDetectorCV:
 															 modelComplexity=1,
 															 detectionCon=0.8
 															 )
-		self.hand_positions = [(0,0)]
+		self.hand_positions = [(0,0)] * 5
 		self.theremin = Theremin()
 		self.running = True
 
@@ -33,6 +33,7 @@ class HandDetectorCV:
 					# lmList1 = hand1['lmList']
 					# handType1 = hand1['type']
 
+					self.hand_positions.remove(self.hand_positions[0])
 					self.hand_positions.append((0,center1[1]))
 
 					# Second hand
@@ -56,7 +57,6 @@ class HandDetectorCV:
 		def audio_t():
 			while self.running:
 				self.theremin.update(self.hand_positions)
-				self.hand_positions = [self.hand_positions[-1]]	
 				time.sleep(1/FPS)
 
 		webcam_t = threading.Thread(target=webcam_t)
