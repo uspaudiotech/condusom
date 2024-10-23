@@ -19,6 +19,7 @@ class Synthesizer:
   # Generates samples of a sine wave
   def callback(self, in_data, frame_count, time_info, status):
     t = (np.arange(frame_count) + self.phase) / SR
+    # t = self.phase / SR
     samples = (self.amplitude * np.sin(2 * np.pi * self.freq * t)).astype(np.float32)
     self.phase = (self.phase + frame_count) % SR
     return (samples.tobytes(), pyaudio.paContinue)

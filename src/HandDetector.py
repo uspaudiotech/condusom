@@ -62,7 +62,7 @@ class HandDetectorMP:
 	def __init__(
 		self,
 		mode=False,
-		maxHands=2,
+		maxHands=1,
 		modelComplexity=1,
 		detectionConf=0.5,
 		trackingConf=0.5,
