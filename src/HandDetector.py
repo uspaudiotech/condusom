@@ -5,10 +5,10 @@ from cvzone.HandTrackingModule import HandDetector
 import mediapipe as mp
 
 class HandDetectorCV:
-	def __init__(self, lock, running, hand_positions):
-		self.lock = lock
-		self.running = running 
-		self.hand_positions = hand_positions
+	def __init__(self, shared_resources):
+		self.lock = shared_resources.lock
+		self.running = shared_resources.running 
+		self.hand_positions = shared_resources.hand_positions
 		self.detector = HandDetector(staticMode=False,
 															 maxHands=MAX_HANDS,
 															 modelComplexity=1,

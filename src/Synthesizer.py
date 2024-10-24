@@ -4,11 +4,10 @@ import numpy as np
 import time
 
 class Synthesizer():
-  def __init__(self, lock, running, hand_positions):
-    super().__init__()
-    self.lock = lock
-    self.running = running 
-    self.hand_positions = hand_positions
+  def __init__(self, shared_resources):
+    self.lock = shared_resources.lock
+    self.running = shared_resources.running 
+    self.hand_positions = shared_resources.hand_positions
     self.pa = pyaudio.PyAudio()
     self.freq = 0
     self.amplitude = 0

@@ -6,12 +6,8 @@ import threading
 def main():
 	shared_resources = SharedResources()
 
-	hand_detector = HandDetectorCV(shared_resources.lock,
-																shared_resources.running,
-																shared_resources.hand_positions)
-	synthesizer = Synthesizer(shared_resources.lock,
-													 shared_resources.running,
-													 shared_resources.hand_positions)
+	hand_detector = HandDetectorCV(shared_resources)
+	synthesizer = Synthesizer(shared_resources)
 
 	hand_detector_thread = threading.Thread(target=hand_detector.run)
 	synthesizer_thread = threading.Thread(target=synthesizer.run)
