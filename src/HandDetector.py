@@ -1,62 +1,45 @@
-from constants import MAX_HANDS, FPS, HEIGHT, NUM_LANDMARKS
-from Synthesizer import Synthesizer
+from constants import MAX_HANDS, HEIGHT, NUM_LANDMARKS
+from Webcam import Webcam
 import cv2
 from cvzone.HandTrackingModule import HandDetector
 import mediapipe as mp
-import threading
-import time
 
 class HandDetectorCV:
-	def __init__(self):
+	def __init__(self, lock, running, hand_positions):
+		self.lock = lock
+		self.running = running 
+		self.hand_positions = hand_positions
 		self.detector = HandDetector(staticMode=False,
 															 maxHands=MAX_HANDS,
 															 modelComplexity=1,
 															 detectionCon=0.8
 															 )
-		self.hand_positions = [-HEIGHT] * NUM_LANDMARKS
-		self.synthesizer = Synthesizer()
-		self.running = True # Flag to stop the threads
+		self.webcam = Webcam()
 
-	def run(self, webcam):
-		def webcam_t():
-			while self.running:
-				success, img = webcam.cap.read()
-				img = cv2.flip(img,1) # mirror the image
-				if not success:
-					break
-				hands, img = self.detector.findHands(img, draw=True, flipType=False)
+	def run(self):
+		print("Starting HandDetectorCV.")
+		while self.running[0]:
+			success, img = self.webcam.cap.read()
+			img = cv2.flip(img,1) # mirror the image
+			if not success:
+				break
+			hands, img = self.detector.findHands(img, draw=True, flipType=False)
 
-				if hands:
-					for hand in hands:
-						lmList = hand['lmList']
-						self.hand_positions = [lm[1] for lm in lmList]
-				else:
-					self.hand_positions = [-HEIGHT] * NUM_LANDMARKS 
+			# with self.lock:
+			if hands:
+				for hand in hands:
+					self.hand_positions[:] = [lm[1] for lm in hand['lmList']]
+			else:
+				self.hand_positions[:] = [-HEIGHT] * NUM_LANDMARKS 
+			# print(f"{self.hand_positions}")
 
-				cv2.imshow("img", img)
+			cv2.imshow("img", img)
 
-				# Press 'd' to exit the application
-				if cv2.waitKey(webcam.refresh_rate) & 0xFF == ord("d"):
-					self.running = False
-					break
-			webcam.cap.release()
-
-		def audio_t():
-			while self.running:
-				self.synthesizer.update(self.hand_positions)
-				time.sleep(1/FPS)
-
-		webcam_t = threading.Thread(target=webcam_t)
-		audio_t = threading.Thread(target=audio_t)
-
-		webcam_t.start()
-		audio_t.start()
-
-		webcam_t.join()
-		audio_t.join()
-
-		self.synthesizer.close()
-		webcam.cap.release()
+			# Press 'd' to exit the application
+			if cv2.waitKey(self.webcam.refresh_rate) & 0xFF == ord("d"):
+				self.running[0] = False
+				print("Stopping HandDetectorCV.")
+				self.webcam.stop()
 
 class HandDetectorMP:
 	def __init__(

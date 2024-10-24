@@ -10,9 +10,10 @@ MAX_FREQ = 1500
 # Audio settings
 SR = MAX_FREQ * 2 + 100
 CHUNK = 64
+SLEEP = 0.07
 
 # Amplitude settings
-DEF_AMP = 0.1
+DEF_AMP = 0.1 
 
 # Hand detection settings
 HAND_DETECTION_CONFIDENCE = 0.8
@@ -20,4 +21,4 @@ MAX_HANDS = 1
 NUM_LANDMARKS = 21
 
 # Webcam settings
-FPS = 30 
+FPS = 24
