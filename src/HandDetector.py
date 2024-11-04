@@ -1,4 +1,4 @@
-from constants import MAX_HANDS, HEIGHT, NUM_LANDMARKS
+from constants import MAX_HANDS, HEIGHT, NUM_LANDMARKS 
 from Webcam import Webcam
 import cv2
 from cvzone.HandTrackingModule import HandDetector
@@ -16,8 +16,20 @@ class HandDetectorCV:
 															 )
 		self.webcam = Webcam()
 
+	def get_hand_positions(self, hands):
+		if hands:
+		# central strategy
+		# 	for hand in hands:
+		# 		self.hand_positions[:] = [(hands[0]['center'][0], hands[0]['center'][1]) for hand in hands]
+		# random strategy
+			for hand in hands:
+				self.hand_positions[:] = [(lm[0],lm[1]) for lm in hand['lmList']]
+
+
+
 	def run(self):
 		print("Starting HandDetectorCV.")
+
 		while self.running[0]:
 			success, img = self.webcam.cap.read()
 			img = cv2.flip(img,1) # mirror the image
@@ -26,11 +38,7 @@ class HandDetectorCV:
 			hands, img = self.detector.findHands(img, draw=True, flipType=False)
 
 			# with self.lock:
-			if hands:
-				for hand in hands:
-					self.hand_positions[:] = [lm[1] for lm in hand['lmList']]
-			else:
-				self.hand_positions[:] = [-HEIGHT] * NUM_LANDMARKS 
+			self.get_hand_positions(hands)
 			# print(f"{self.hand_positions}")
 
 			cv2.imshow("img", img)
