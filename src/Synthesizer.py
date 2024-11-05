@@ -2,8 +2,9 @@ from constants import SR, DEF_AMP, HEIGHT, MIN_FREQ, MAX_FREQ, NUM_LANDMARKS, FP
 import pyaudio
 import numpy as np
 import time
+from abc import ABC, abstractmethod
 
-class Synthesizer():
+class Synthesizer(ABC):
   def __init__(self, shared_resources):
     self.lock = shared_resources.lock
     self.running = shared_resources.running 
@@ -19,7 +20,6 @@ class Synthesizer():
                                stream_callback=self.callback
                               )
 
-  # Generates samples of a sine wave
   def callback(self, in_data, frame_count, time_info, status):
     # Create an array of time values for the current frame
     t = np.arange(frame_count) / SR
@@ -34,25 +34,34 @@ class Synthesizer():
     # Return the generated samples and indicate that the stream should continue
     return (samples.tobytes(), pyaudio.paContinue)
   
-  def random_freq(self):
-    """
-    Chooses a random landmark from a list of landmarks
-    """
-    return self.hand_positions[np.random.randint(0,NUM_LANDMARKS)]
-
-  def central_freq(self):
-    return self.hand_positions[0]
+  @abstractmethod
+  def get_hand_coords(self):
+    pass
 
   def update(self):
     # with self.lock:
-    print(f"{self.hand_positions}")
+    # print(f"{self.hand_positions}")
 
-    _, y = self.random_freq()
-    # _, y = self.central_freq()
+    _, y = self.get_hand_coords()
 
     # Map the y-coordinate of the hand to a frequency value
     self.freq = np.interp(y, [int(-HEIGHT/2),HEIGHT-100], [MAX_FREQ,MIN_FREQ])
-    # self.freq = np.interp(y, [0,HEIGHT], [MAX_FREQ,MIN_FREQ])
+   
+  @abstractmethod
+  def run(self):
+    pass
+
+  def stop(self):
+    print("Stopping Synthesizer.")
+    self.stream.stop_stream()
+    self.stream.close()
+    self.pa.terminate()
+
+
+
+class SynthesizerCentralFreq(Synthesizer):
+  def get_hand_coords(self):
+    return self.hand_positions[0]
 
   def run(self):
     print("Starting Synthesizer.")
@@ -60,12 +69,19 @@ class Synthesizer():
     while self.running[0]:
       # print("Synthesizer running.")
       self.update()
-      # time.sleep(1/FPS)
-      time.sleep(SLEEP)
     self.stop()
 
-  def stop(self):
-    print("Stopping Synthesizer.")
-    self.stream.stop_stream()
-    self.stream.close()
-    self.pa.terminate()
+
+
+class SynthesizerRandomFreq(Synthesizer):
+  def get_hand_coords(self):
+    return self.hand_positions[np.random.randint(0,NUM_LANDMARKS)]
+
+  def run(self):
+    print("Starting Synthesizer.")
+    self.stream.start_stream()
+    while self.running[0]:
+      # print("Synthesizer running.")
+      self.update()
+      time.sleep(SLEEP)
+    self.stop()
