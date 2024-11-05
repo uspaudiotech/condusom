@@ -1,3 +1,3 @@
 # Condusom
 
-_**Condusom**_ é um sintetizador musical interativo que converte gestos capturados pela sua webcam em uma expressão sonora dinâmica.
+**_Condusom_** is an interactive musical synthesizer that transforms gestures captured by your webcam into a dynamic sonic expression.
