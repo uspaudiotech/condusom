@@ -1,10 +1,10 @@
 from constants import SR, DEF_AMP, HEIGHT, MIN_FREQ, MAX_FREQ, NUM_LANDMARKS, FPS, SLEEP
 import pyaudio
 import numpy as np
-import time
+from time import sleep
 from abc import ABC, abstractmethod
 
-class Synthesizer(ABC):
+class Synth(ABC):
   def __init__(self, shared_resources):
     self.lock = shared_resources.lock
     self.running = shared_resources.running 
@@ -28,7 +28,6 @@ class Synthesizer(ABC):
     samples = (self.amplitude * np.sin(self.phase + (2 * np.pi * self.freq * t))).astype(np.float32)
     
     # Update the phase to ensure continuity of the sine wave in the next callback
-    # self.phase = (self.phase + frame_count) % SR
     self.phase += 2 * np.pi * self.freq * (frame_count / SR)
     
     # Return the generated samples and indicate that the stream should continue
@@ -45,43 +44,45 @@ class Synthesizer(ABC):
     _, y = self.get_hand_coords()
 
     # Map the y-coordinate of the hand to a frequency value
-    self.freq = np.interp(y, [int(-HEIGHT/2),HEIGHT-100], [MAX_FREQ,MIN_FREQ])
+    self.freq = np.interp(y, [0,int(0.8*HEIGHT)], [MAX_FREQ,MIN_FREQ])
    
   @abstractmethod
   def run(self):
     pass
 
   def stop(self):
-    print("Stopping Synthesizer.")
+    print("Stopping Synth.")
     self.stream.stop_stream()
     self.stream.close()
     self.pa.terminate()
 
 
 
-class SynthesizerCentralFreq(Synthesizer):
+class SynthCentralFreq(Synth):
   def get_hand_coords(self):
+    print(self.hand_positions[0])
     return self.hand_positions[0]
 
   def run(self):
-    print("Starting Synthesizer.")
+    print("Starting Synth.")
     self.stream.start_stream()
     while self.running[0]:
-      # print("Synthesizer running.")
+      # print("Synth running.")
       self.update()
+      # sleep(1/SR)
     self.stop()
 
 
 
-class SynthesizerRandomFreq(Synthesizer):
+class SynthRandomFreq(Synth):
   def get_hand_coords(self):
     return self.hand_positions[np.random.randint(0,NUM_LANDMARKS)]
 
   def run(self):
-    print("Starting Synthesizer.")
+    print("Starting Synth.")
     self.stream.start_stream()
     while self.running[0]:
-      # print("Synthesizer running.")
+      # print("Synth running.")
       self.update()
-      time.sleep(SLEEP)
+      sleep(SLEEP)
     self.stop()
