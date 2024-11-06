@@ -58,7 +58,7 @@ class Synth(ABC):
 
 
 
-class SynthCentralFreq(Synth):
+class SynthCenter(Synth):
   def get_hand_coords(self):
     print(self.hand_positions[0])
     return self.hand_positions[0]
@@ -74,7 +74,7 @@ class SynthCentralFreq(Synth):
 
 
 
-class SynthRandomFreq(Synth):
+class SynthRandom(Synth):
   def get_hand_coords(self):
     return self.hand_positions[np.random.randint(0,NUM_LANDMARKS)]
 

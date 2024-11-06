@@ -5,7 +5,7 @@ from cvzone.HandTrackingModule import HandDetector
 import mediapipe as mp
 from abc import ABC, abstractmethod
 
-class HandDetectorCV(ABC):
+class HandTracker(ABC):
 	def __init__(self, shared_resources):
 		self.lock = shared_resources.lock
 		self.running = shared_resources.running 
@@ -22,7 +22,7 @@ class HandDetectorCV(ABC):
 		pass
 
 	def run(self):
-		print("Starting HandDetectorCV.")
+		print("Starting HandTracker.")
 
 		while self.running[0]:
 			success, img = self.webcam.cap.read()
@@ -40,16 +40,16 @@ class HandDetectorCV(ABC):
 			# Press 'd' to exit the application
 			if cv2.waitKey(self.webcam.refresh_rate) & 0xFF == ord("d"):
 				self.running[0] = False
-				print("Stopping HandDetectorCV.")
+				print("Stopping HandTracker.")
 				self.webcam.stop()
 
-class HandDetectorCVRandomFreq(HandDetectorCV):
+class HandTrackerRandom(HandTracker):
 	def get_hand_positions(self, hands):
 		if hands:
 			for hand in hands:
 				self.hand_positions[:] = [(lm[0],lm[1]) for lm in hand['lmList']]
 
-class HandDetectorCVCentralFreq(HandDetectorCV):
+class HandTrackerCenter(HandTracker):
 	def get_hand_positions(self, hands):
 		if hands:
 			self.hand_positions[:] = [(hands[0]['center'][0], hands[0]['center'][1]) for hand in hands]
