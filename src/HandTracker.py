@@ -1,39 +1,46 @@
-from constants import MAX_HANDS, HEIGHT, NUM_LANDMARKS 
+from constants import MAX_HANDS 
 from Webcam import Webcam
 import cv2
 from cvzone.HandTrackingModule import HandDetector
 import mediapipe as mp
-from abc import ABC, abstractmethod
 
-class HandTracker(ABC):
+class HandTracker():
 	def __init__(self, shared_resources):
-		self.lock = shared_resources.lock
-		self.running = shared_resources.running 
-		self.hand_positions = shared_resources.hand_positions
-		self.detector = HandDetector(staticMode=False,
-															 maxHands=MAX_HANDS,
-															 modelComplexity=1,
-															 detectionCon=0.8
-															 )
-		self.webcam = Webcam()
+		# Shared resources setup
+		self.lock           = shared_resources.lock
+		self.running        = shared_resources.running 
+		self.hand_landmarks = shared_resources.hand_landmarks
+		self.hand_center    = shared_resources.hand_center
 
-	@abstractmethod
-	def get_hand_positions(self, hands):
-		pass
+		self.webcam         = Webcam()
+		self.detector       = HandDetector(staticMode=False,
+																			maxHands=MAX_HANDS,
+																			modelComplexity=1,
+																			detectionCon=0.8
+																			)
+		
+	def set_hand_landmarks(self, hands):
+		if hands:
+			for hand in hands:
+				self.hand_landmarks[:] = [(lm[0],lm[1]) for lm in hand['lmList']]
+
+	def set_hand_center(self, hands):
+		if hands:
+			self.hand_center[:] = [(hands[0]['center'][0], hands[0]['center'][1]) for hand in hands]
 
 	def run(self):
 		print("Starting HandTracker.")
 
 		while self.running[0]:
 			success, img = self.webcam.cap.read()
-			img = cv2.flip(img,1) # mirror the image
+			img = cv2.flip(img,1) # Mirror the image
 			if not success:
 				break
 			hands, img = self.detector.findHands(img, draw=True, flipType=False)
 
-			# with self.lock:
-			self.get_hand_positions(hands)
-			# print(f"{self.hand_positions}")
+			with self.lock:
+				self.set_hand_landmarks(hands)
+				self.set_hand_center(hands)
 
 			cv2.imshow("img", img)
 
@@ -43,18 +50,9 @@ class HandTracker(ABC):
 				print("Stopping HandTracker.")
 				self.webcam.stop()
 
-class HandTrackerRandom(HandTracker):
-	def get_hand_positions(self, hands):
-		if hands:
-			for hand in hands:
-				self.hand_positions[:] = [(lm[0],lm[1]) for lm in hand['lmList']]
-
-class HandTrackerCenter(HandTracker):
-	def get_hand_positions(self, hands):
-		if hands:
-			self.hand_positions[:] = [(hands[0]['center'][0], hands[0]['center'][1]) for hand in hands]
 
 
+'''
 class HandDetectorMP:
 	def __init__(
 		self,
@@ -152,3 +150,4 @@ class HandDetectorMP:
 			# Press 'd' to exit the application
 			if cv2.waitKey(webcam.refresh_rate) & 0xFF == ord("d"):
 				break	
+'''
