@@ -102,7 +102,6 @@ class Synth(ABC):
   
   def update(self):
     with self.lock:
-      print(self.hand_center)
       x, y = self.map_hand.get_hand_coords(self.hand_landmarks, self.hand_center)
       self.freq = self.map_freq.map_frequency(y)
 
