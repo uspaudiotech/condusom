@@ -1,17 +1,19 @@
-from Condusom import CondusomCenter, CondusomRandom
+from Condusom import Condusom
 import sys
 
-def main(strategy):
-	if strategy == 'center':
-		condusom = CondusomCenter()
-	elif strategy == 'random':
-		condusom = CondusomRandom()
+def main(map_hand_strat, map_freq_strat):
+	print(f"Hand mapping strategy: {map_hand_strat}")
+	print(f"Frequency mapping strategy: {map_freq_strat}")
+
+	condusom = Condusom(map_hand_strat, map_freq_strat)
 
 	condusom.run()
 
 if __name__ == "__main__":
-	if len(sys.argv) != 2:
-		print("Usage: python main.py <strategy>")
+	if len(sys.argv) != 3:
+		print("Usage: python main.py <map_hand_strat> <map_freq_strat>")
 		sys.exit(1)
-	strategy = sys.argv[1]
-	main(strategy)
+	map_hand_strat = sys.argv[1]
+	map_freq_strat = sys.argv[2]
+
+	main(map_hand_strat, map_freq_strat)

@@ -1,14 +1,14 @@
 from SharedResources import SharedResources
-from Synth import Synth, SynthCenter, SynthRandom
+from Synth import Synth
 from HandTracker import HandTracker
 from abc import ABC, abstractmethod
 import threading
 
-class Condusom(ABC):
-  def __init__(self):
+class Condusom():
+  def __init__(self, map_hand_strat, map_freq_strat):
     self.shared_resources = SharedResources()
     self.hand_tracker     = HandTracker(self.shared_resources)
-    self.synth            = self.create_synth(self.shared_resources)
+    self.synth            = Synth(map_hand_strat, map_freq_strat, self.shared_resources)
   
   def run(self):
     print("Starting Condusom.")
@@ -20,20 +20,3 @@ class Condusom(ABC):
 
     hand_tracker_thread.join()
     synth_thread.join()
-  
-
-  @abstractmethod
-  def create_synth(self) -> Synth:
-    pass
-
-
-
-class CondusomCenter(Condusom):
-  def create_synth(self, shared_resources) -> SynthCenter:
-    return SynthCenter(shared_resources)
-  
-
-
-class CondusomRandom(Condusom):
-  def create_synth(self, shared_resources) -> SynthRandom:
-    return SynthRandom(shared_resources)
