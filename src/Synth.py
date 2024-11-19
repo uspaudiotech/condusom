@@ -6,20 +6,21 @@ from abc import ABC, abstractmethod
 
 class MapFreq(ABC):
   @abstractmethod
-  def map_frequency(self, x):
+  def map_frequency(self, f):
     pass
 
 class MapFreqLinear(MapFreq):
-  def map_frequency(self, x):
-    return np.interp(x, [0, int(0.8*HEIGHT)], [MAX_FREQ, MIN_FREQ])
+  def map_frequency(self, f):
+    if f is not None: 
+      return np.interp(f, [0, int(0.8*HEIGHT)], [MAX_FREQ, MIN_FREQ])
 
 class MapFreqExponential(MapFreq):
-  def map_frequency(self, x):
-    return MIN_FREQ * (MAX_FREQ / MIN_FREQ) ** (x / HEIGHT)
+  def map_frequency(self, f):
+    return MIN_FREQ * (MAX_FREQ / MIN_FREQ) ** (f / HEIGHT)
 
 class MapFreqLogarithmic(MapFreq):
-  def map_frequency(self, x):
-    return MIN_FREQ + (MAX_FREQ - MIN_FREQ) * np.log1p(x) / np.log1p(HEIGHT)
+  def map_frequency(self, f):
+    return MIN_FREQ + (MAX_FREQ - MIN_FREQ) * np.log1p(f) / np.log1p(HEIGHT)
 
 class MapFreqFactory:
   def create_map_freq(strategy: str) -> MapFreq:
@@ -30,31 +31,34 @@ class MapFreqFactory:
     elif strategy == 'logarithmic':
       return MapFreqLogarithmic()
     else:
-      raise ValueError(f"Unknown map frequency strategy: {strategy}")
+      raise ValueError(f"Unknown frequency mapping strategy: {strategy}")
     
 
 
 class MapHand(ABC):
   @abstractmethod
-  def get_hand_coords(hand_landmarks, hand_center):
+  def get_hand_coords(self, hand_landmarks, hand_center):
     pass
 
 class MapHandCenter(MapHand):
-  def get_hand_coords(hand_landmarks, hand_center):
+  def get_hand_coords(self, hand_landmarks, hand_center):
     return hand_center[0]
 
 class MapHandRandom(MapHand):
-  def get_map_hand(hand_landmarks, hand_center):
-    return hand_landmarks[np.random.randint(0, NUM_LANDMARKS)]
+  def get_hand_coords(self, hand_landmarks, hand_center):
+    coords = hand_landmarks[np.random.randint(0, NUM_LANDMARKS)]
+    if coords is not None:
+      return coords
+    return (0,0)
 
 class HandCoordsFactory:
   def create_map_hand(strategy: str) -> MapHand:
     if strategy == 'center':
-      return MapHandCenter 
+      return MapHandCenter()
     elif strategy == 'random':
-      return MapHandRandom 
+      return MapHandRandom()
     else:
-      raise ValueError(f"Unknown hand coor strategy: {strategy}")
+      raise ValueError(f"Unknown hand mapping strategy: {strategy}")
 
 
 
@@ -98,7 +102,8 @@ class Synth(ABC):
   
   def update(self):
     with self.lock:
-      _, y = self.map_hand.get_hand_coords(self.hand_landmarks, self.hand_center)
+      print(self.hand_center)
+      x, y = self.map_hand.get_hand_coords(self.hand_landmarks, self.hand_center)
       self.freq = self.map_freq.map_frequency(y)
 
   def stop(self):
@@ -114,4 +119,3 @@ class Synth(ABC):
       self.update()
       sleep(SLEEP)
     self.stop()
-    self.map_hand.run()
