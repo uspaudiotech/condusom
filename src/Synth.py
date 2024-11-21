@@ -1,35 +1,32 @@
-from constants import SR, DEF_AMP, HEIGHT, MIN_FREQ, MAX_FREQ, NUM_LANDMARKS, FPS, SLEEP
+from constants import DEF_BLOCK_SIZE, SR, DEF_AMP, HEIGHT, MIN_FREQ, MAX_FREQ, NUM_LANDMARKS, FPS, SLEEP
 import pyaudio
 import numpy as np
 from time import sleep
 from abc import ABC, abstractmethod
 
+
+
 class MapFreq(ABC):
   @abstractmethod
-  def map_frequency(self, f):
+  def map(self, f):
     pass
 
-class MapFreqLinear(MapFreq):
-  def map_frequency(self, f):
+class MapFreqLin(MapFreq):
+  def map(self, f):
     if f is not None: 
       return np.interp(f, [0, int(0.8*HEIGHT)], [MAX_FREQ, MIN_FREQ])
 
-class MapFreqExponential(MapFreq):
-  def map_frequency(self, f):
-    return MIN_FREQ * (MAX_FREQ / MIN_FREQ) ** (f / HEIGHT)
-
-class MapFreqLogarithmic(MapFreq):
-  def map_frequency(self, f):
-    return MIN_FREQ + (MAX_FREQ - MIN_FREQ) * np.log1p(f) / np.log1p(HEIGHT)
+class MapFreqLog(MapFreq):
+  def map(self, f):
+    if f is not None:
+      return MAX_FREQ * np.exp(np.log(MIN_FREQ/MAX_FREQ) * (f - 0) / (HEIGHT - 0))
 
 class MapFreqFactory:
-  def create_map_freq(strategy: str) -> MapFreq:
+  def create_map(strategy: str) -> MapFreq:
     if strategy == 'linear':
-      return MapFreqLinear()
-    elif strategy == 'exponential':
-      return MapFreqExponential()
+      return MapFreqLin()
     elif strategy == 'logarithmic':
-      return MapFreqLogarithmic()
+      return MapFreqLog()
     else:
       raise ValueError(f"Unknown frequency mapping strategy: {strategy}")
     
@@ -52,7 +49,7 @@ class MapHandRandom(MapHand):
     return (0,0)
 
 class HandCoordsFactory:
-  def create_map_hand(strategy: str) -> MapHand:
+  def create_map(strategy: str) -> MapHand:
     if strategy == 'center':
       return MapHandCenter()
     elif strategy == 'random':
@@ -70,12 +67,12 @@ class Synth(ABC):
     self.hand_landmarks = shared_resources.hand_landmarks
     self.hand_center    = shared_resources.hand_center
 
-    # Synth parameters 
+    # Synth parameters setup
     self.freq           = 0
     self.phase          = 0
     self.amplitude      = DEF_AMP
-    self.map_freq       = MapFreqFactory.create_map_freq(map_freq_strat)
-    self.map_hand       = HandCoordsFactory.create_map_hand(map_hand_strat)
+    self.map_freq       = MapFreqFactory.create_map(map_freq_strat)
+    self.map_hand       = HandCoordsFactory.create_map(map_hand_strat)
 
     # PyAudio setup
     self.pa             = pyaudio.PyAudio()
@@ -83,6 +80,7 @@ class Synth(ABC):
                                        channels=1,
                                        rate=SR,
                                        output=True,
+                                      #  frames_per_buffer=DEF_BLOCK_SIZE,
                                        stream_callback=self.callback
                                        )
 
@@ -103,7 +101,7 @@ class Synth(ABC):
   def update(self):
     with self.lock:
       x, y = self.map_hand.get_hand_coords(self.hand_landmarks, self.hand_center)
-      self.freq = self.map_freq.map_frequency(y)
+      self.freq = self.map_freq.map(y)
 
   def stop(self):
     print("Stopping Synth.")

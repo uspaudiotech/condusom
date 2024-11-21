@@ -1,8 +1,10 @@
-from constants import MAX_HANDS 
+from constants import HAND_DETECTION_CONFIDENCE, MAX_HANDS 
 from Webcam import Webcam
 import cv2
 from cvzone.HandTrackingModule import HandDetector
-import mediapipe as mp
+# import mediapipe as mp
+
+
 
 class HandTracker():
 	def __init__(self, shared_resources):
@@ -16,7 +18,7 @@ class HandTracker():
 		self.detector       = HandDetector(staticMode=False,
 																			maxHands=MAX_HANDS,
 																			modelComplexity=1,
-																			detectionCon=0.8
+																			detectionCon=HAND_DETECTION_CONFIDENCE
 																			)
 		
 	def set_hand_landmarks(self, hands):
